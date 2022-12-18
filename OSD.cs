@@ -1,11 +1,12 @@
 
+
 namespace OSD
 {
-    enum fileTypes {basic,rts}
+    enum fileTypes {basic,usp}
     public partial class OSD : Form
     {
         bool gridEnabled;
-        bool returnToStart = false;
+        bool useSamePath = false;
         bool darkMode = false;
         byte fileType = (byte)fileTypes.basic;
         int gridSize=3;
@@ -23,22 +24,27 @@ namespace OSD
         {
             InitializeComponent();
 
-            if (path != string.Empty && Path.GetExtension(path).ToLower() == ".pes")
+            if (path != string.Empty && Path.GetExtension(path).ToLower() == ".osd")
             {
                 LoadFile(path);
             }
             else if(path != string.Empty)
             {
-                MessageBox.Show("Dropped File is not pes File", "File Type Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Dropped File is not osd File", "File Type Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 path = string.Empty;
             }
         }
 
         private void TurboProgram_Load(object sender, EventArgs e)
         {
+            
             KeyPreview = true;
             currentScale = 1000f / panel.Width;
             TurboProgram_Resize(this, EventArgs.Empty);
+            typeof(Panel).InvokeMember("DoubleBuffered",
+            System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+            null, panel, new object[] { true });
+
         }
 
         private void panel_Paint(object sender, PaintEventArgs e)
@@ -87,34 +93,37 @@ namespace OSD
 
         private void panel_MouseClick(object sender, MouseEventArgs e)
         {
+            int x;
+            int y;
             if (gridEnabled)
             {
-                int x = mouseGrid.X; 
-                int y = mouseGrid.Y; 
-                Latest = new Point((int)(x * currentScale), (int)(y * currentScale));
+                x = mouseGrid.X; 
+                y = mouseGrid.Y; 
             }
             else
             {
-                Latest = new Point((int)(e.X * currentScale), (int)(e.Y * currentScale));
+                x = (int)(e.X * currentScale);
+                y = (int)(e.Y * currentScale);
             }
-            
+            Latest = new Point((int)(x * currentScale), (int)(y * currentScale));
+
             _points.Add(Latest);
             ListViewItem item = new ListViewItem(_points.Count().ToString());
-            item.SubItems.Add(((int)(e.X*currentScale)).ToString());
-            item.SubItems.Add(((int)(e.Y*currentScale)).ToString());
+            item.SubItems.Add(((int)(x*currentScale)).ToString());
+            item.SubItems.Add(((int)(x*currentScale)).ToString());
             item.BackColor = backColor;
             item.ForeColor = textColor;
             listView1.Items.Add(item);
             
-            Refresh();
+            panel.Invalidate();
         }
 
         private void panel_MouseLeave(object sender, EventArgs e)
         {
-            if (_points.Count>0&&!returnToStart)
+            if (_points.Count>0&&!useSamePath)
             {
                 _points.Add(_points[0]);
-                Refresh();
+                panel.Invalidate();
             }
             
         }
@@ -123,7 +132,7 @@ namespace OSD
             if (_points.Count>1 && _points[0]==_points[_points.Count-1])
             {
                 _points.RemoveAt(_points.Count-1);
-                Refresh();
+                panel.Invalidate();
             }
         }
         private void panel_MouseMove(object sender, MouseEventArgs e)
@@ -133,7 +142,7 @@ namespace OSD
                 if (oldMouseGrid != mouseGrid)
                 {
 
-                    Refresh();
+                    panel.Invalidate();
                 }
                 oldMouseGrid = mouseGrid;
                 mouseGrid = new Point((e.X + panel.Width / (gridSize * 2)) / (panel.Width / gridSize) * (panel.Width / gridSize),
@@ -145,17 +154,17 @@ namespace OSD
         {
             _points.Clear();
             listView1.Items.Clear();
-            Refresh();
+            panel.Invalidate();
         }
         private void saveButton_Click(object sender, EventArgs e)
         {
             if (_points.Count>0)
             {
                 SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-                saveFileDialog1.Filter = "havo|*.pes";
-                saveFileDialog1.Title = "Save a Mario";
+                saveFileDialog1.Filter = "Oscilloscope drawing|*.osd";
+                saveFileDialog1.Title = "Save drawing";
                 saveFileDialog1.ShowDialog();
-                if (!returnToStart)
+                if (!useSamePath)
                 {
                     _points.RemoveAt(_points.Count - 1);
                 }
@@ -163,18 +172,18 @@ namespace OSD
                 {
                     using (Stream stream = saveFileDialog1.OpenFile())
                     {
-                        using (var writer = new BinaryWriter(stream, System.Text.Encoding.ASCII, false))
+                        using (BinaryWriter writer = new BinaryWriter(stream, System.Text.Encoding.ASCII, false))
                         {
                             writer.Write(fileType);
-                            writer.Write(returnToStart ? _points.Count() * 2-2:_points.Count()) ;
+                            writer.Write(useSamePath ? _points.Count() * 2-2:_points.Count());
                             foreach (Point p in _points)
                             {
                                 writer.Write(p.X);
                                 writer.Write(p.Y);
                             }
-                            if (returnToStart)
+                            if (useSamePath)
                             {
-                                for (int i= _points.Count()-2;i  > 0 ; i--)
+                                for (int i= _points.Count()-2;i > 0 ; i--)
                                 {
                                     writer.Write(_points[i].X);
                                     writer.Write(_points[i].Y);
@@ -187,13 +196,13 @@ namespace OSD
             }
             else
             {
-                MessageBox.Show("0 bodov :(","Sikovnicek",MessageBoxButtons.OK,MessageBoxIcon.Exclamation);
+                MessageBox.Show("0 points nothing to save","0 points",MessageBoxButtons.OK,MessageBoxIcon.Exclamation);
             }   
         }
         private void loadButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "havo|*.pes";
+            ofd.Filter = "Oscilloscope drawing|*.osd";
             ofd.ShowDialog();
             if (File.Exists(ofd.FileName))
             {
@@ -220,7 +229,7 @@ namespace OSD
             gridCheckBox.Location = new Point(resetButton.Location.X, resetButton.Location.Y -87);
             gridTrackBar.Location = new Point(gridCheckBox.Location.X, gridCheckBox.Location.Y + 25);
             darkModeButton.Location = new Point(gridCheckBox.Location.X + 174,gridCheckBox.Location.Y);
-            rtsCheckBox.Location = new Point(gridTrackBar.Location.X, gridTrackBar.Location.Y + 37);
+            uspCheckBox.Location = new Point(gridTrackBar.Location.X, gridTrackBar.Location.Y + 37);
             loadButton.Location = new Point(saveButton.Location.X+107, saveButton.Location.Y);
             Refresh();
         }
@@ -233,7 +242,7 @@ namespace OSD
             {
                 _points.RemoveAt(_points.Count() - 1);
                 listView1.Items.RemoveAt(_points.Count());
-                Refresh();
+                panel.Invalidate();
             }
             
         }
@@ -276,29 +285,29 @@ namespace OSD
             loadButton.ForeColor = textColor;   
             darkModeButton.BackColor = backColor;
             darkModeButton.ForeColor = textColor;
-            rtsCheckBox.ForeColor = textColor;
+            uspCheckBox.ForeColor = textColor;
         }
 
-        private void rtsCheckBox_CheckedChanged(object sender, EventArgs e)
+        private void uspCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            returnToStart=rtsCheckBox.Checked;
-            if (rtsCheckBox.Checked)
+            useSamePath=uspCheckBox.Checked;
+            if (uspCheckBox.Checked)
             {
-                fileType=(byte)fileTypes.rts;
+                fileType=(byte)fileTypes.usp;
             }
             else
             {
                 fileType = (byte)fileTypes.basic;
             }
-            if (rtsCheckBox.Checked && _points.Count > 0 && _points[0] == _points[_points.Count - 1])
+            if (uspCheckBox.Checked && _points.Count > 0 && _points[0] == _points[_points.Count - 1])
             {
                 _points.RemoveAt(_points.Count - 1);
             }
-            else if (_points.Count > 0 && !rtsCheckBox.Checked)
+            else if (_points.Count > 0 && !uspCheckBox.Checked)
             {
                 _points.Add(_points[0]);
             }
-            Refresh();
+            panel.Invalidate();
 
         }
 
@@ -307,7 +316,7 @@ namespace OSD
         private void gridCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             gridEnabled = gridCheckBox.Checked;
-            Refresh();
+            panel.Invalidate();
         }
 
         private void gridTrackBar_Scroll(object sender, EventArgs e)
@@ -315,7 +324,7 @@ namespace OSD
             gridSize = gridTrackBar.Value;
             if (gridEnabled)
             {
-                Refresh();
+                panel.Invalidate();
             }
             
         }
@@ -344,15 +353,15 @@ namespace OSD
                 item.ForeColor = textColor;
                 listView1.Items.Add(item);
             }
-            if (fileType == (byte)fileTypes.rts)
+            if (fileType == (byte)fileTypes.usp)
             {
-                rtsCheckBox.Checked = true;
+                uspCheckBox.Checked = true;
             }
             else
             {
-                rtsCheckBox.Checked = false;
+                uspCheckBox.Checked = false;
             }
-            rtsCheckBox_CheckedChanged(this, EventArgs.Empty);
+            uspCheckBox_CheckedChanged(this, EventArgs.Empty);
         }
     }
 }

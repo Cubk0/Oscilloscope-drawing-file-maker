@@ -39,7 +39,7 @@
             this.gridCheckBox = new System.Windows.Forms.CheckBox();
             this.gridTrackBar = new System.Windows.Forms.TrackBar();
             this.darkModeButton = new System.Windows.Forms.Button();
-            this.rtsCheckBox = new System.Windows.Forms.CheckBox();
+            this.uspCheckBox = new System.Windows.Forms.CheckBox();
             this.loadButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.gridTrackBar)).BeginInit();
             this.SuspendLayout();
@@ -153,16 +153,16 @@
             this.darkModeButton.UseVisualStyleBackColor = false;
             this.darkModeButton.Click += new System.EventHandler(this.darkModeButton_Click);
             // 
-            // rtsCheckBox
+            // uspCheckBox
             // 
-            this.rtsCheckBox.AutoSize = true;
-            this.rtsCheckBox.Location = new System.Drawing.Point(1024, 853);
-            this.rtsCheckBox.Name = "rtsCheckBox";
-            this.rtsCheckBox.Size = new System.Drawing.Size(101, 19);
-            this.rtsCheckBox.TabIndex = 7;
-            this.rtsCheckBox.Text = "Return to start";
-            this.rtsCheckBox.UseVisualStyleBackColor = true;
-            this.rtsCheckBox.CheckedChanged += new System.EventHandler(this.rtsCheckBox_CheckedChanged);
+            this.uspCheckBox.AutoSize = true;
+            this.uspCheckBox.Location = new System.Drawing.Point(1024, 853);
+            this.uspCheckBox.Name = "uspCheckBox";
+            this.uspCheckBox.Size = new System.Drawing.Size(131, 19);
+            this.uspCheckBox.TabIndex = 7;
+            this.uspCheckBox.Text = "Use same path back";
+            this.uspCheckBox.UseVisualStyleBackColor = true;
+            this.uspCheckBox.CheckedChanged += new System.EventHandler(this.uspCheckBox_CheckedChanged);
             // 
             // loadButton
             // 
@@ -183,7 +183,7 @@
             this.BackColor = System.Drawing.Color.DarkGray;
             this.ClientSize = new System.Drawing.Size(1240, 1017);
             this.Controls.Add(this.loadButton);
-            this.Controls.Add(this.rtsCheckBox);
+            this.Controls.Add(this.uspCheckBox);
             this.Controls.Add(this.darkModeButton);
             this.Controls.Add(this.gridTrackBar);
             this.Controls.Add(this.gridCheckBox);
@@ -217,7 +217,7 @@
         private CheckBox gridCheckBox;
         private TrackBar gridTrackBar;
         private Button darkModeButton;
-        private CheckBox rtsCheckBox;
+        private CheckBox uspCheckBox;
         private Button loadButton;
     }
 }
