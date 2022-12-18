@@ -1,2 +1,5 @@
 
 *.user
+*bin/
+*obj/
+*.vs/

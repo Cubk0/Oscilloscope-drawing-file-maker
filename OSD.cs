@@ -102,8 +102,8 @@ namespace OSD
             }
             else
             {
-                x = (int)(e.X * currentScale);
-                y = (int)(e.Y * currentScale);
+                x = (e.X);
+                y = (e.Y);
             }
             Latest = new Point((int)(x * currentScale), (int)(y * currentScale));
 
@@ -175,18 +175,18 @@ namespace OSD
                         using (BinaryWriter writer = new BinaryWriter(stream, System.Text.Encoding.ASCII, false))
                         {
                             writer.Write(fileType);
-                            writer.Write(useSamePath ? _points.Count() * 2-2:_points.Count());
+                            writer.Write((Int16)(useSamePath ? _points.Count() * 2-2:_points.Count()));
                             foreach (Point p in _points)
                             {
-                                writer.Write(p.X);
-                                writer.Write(p.Y);
+                                writer.Write((Int16)p.X);
+                                writer.Write((Int16)p.Y);
                             }
                             if (useSamePath)
                             {
                                 for (int i= _points.Count()-2;i > 0 ; i--)
                                 {
-                                    writer.Write(_points[i].X);
-                                    writer.Write(_points[i].Y);
+                                    writer.Write((Int16)_points[i].X);
+                                    writer.Write((Int16)_points[i].Y);
                                 }
                             }
                         }
@@ -337,10 +337,10 @@ namespace OSD
                 using (var reader = new BinaryReader(stream, System.Text.Encoding.ASCII, false))
                 {
                     fileType = reader.ReadByte();
-                    int length = fileType == (byte)fileTypes.basic ? reader.ReadInt32() : reader.ReadInt32() / 2 + 1;
+                    int length = fileType == (byte)fileTypes.basic ? reader.ReadInt16() : reader.ReadInt16() / 2 + 1;
                     for (int i = 0; i < length; i++)
                     {
-                        _points.Add(new Point(reader.ReadInt32(), reader.ReadInt32()));
+                        _points.Add(new Point(reader.ReadInt16(), reader.ReadInt16()));
                     }
                 }
             }
