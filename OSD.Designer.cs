@@ -196,7 +196,7 @@
             this.MinimumSize = new System.Drawing.Size(500, 500);
             this.Name = "OSD";
             this.Text = "OSD";
-            this.Load += new System.EventHandler(this.TurboProgram_Load);
+            this.Load += new System.EventHandler(this.OSD_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TurboProgram_KeyDown);
             this.Resize += new System.EventHandler(this.TurboProgram_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.gridTrackBar)).EndInit();

@@ -35,7 +35,7 @@ namespace OSD
             }
         }
 
-        private void TurboProgram_Load(object sender, EventArgs e)
+        private void OSD_Load(object sender, EventArgs e)
         {
             
             KeyPreview = true;
@@ -120,7 +120,7 @@ namespace OSD
 
         private void panel_MouseLeave(object sender, EventArgs e)
         {
-            if (_points.Count>0&&!useSamePath)
+            if (_points.Count>2&&!useSamePath)
             {
                 _points.Add(_points[0]);
                 panel.Invalidate();
